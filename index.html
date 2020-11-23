@@ -13,20 +13,55 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       #messages { margin-bottom: 40px }
+      .container{
+        width: 100%;
+        display: flex;
+      }
+      .container .ch-container{
+        width: 90%;
+      }
+      .container .room-container{
+        width: 10%;
+      }
+      .container .room_ch{
+        cursor: pointer;
+        padding: 3px;
+      }
+      .container .room_ch:hover{
+        opacity: 0.8;
+        background-color: aqua;
+      }
+      .container .room_ch.active{
+        background-color: aqua;
+      }
     </style>
   </head>
   <body>
-    <ul class="show-messages" data-room="100"></ul>
+  <div class="container">
+    <div class="ch-container">
+      <ul class="show-messages" data-room="100"></ul>
+    </div>
+    <div class="room-container">
+      <div class="room-c">
+        <div class="room_ch" data-room="1">room1</div>
+        <div class="room_ch" data-room="2">room2</div>
+        <div class="room_ch" data-room="3">room3</div>
+      </div>
+    </div>
+  </div>
 
-    <form action="" data-room="100">
+
+
+    <form id="form_chat" action="" data-room="100">
       <input   class="name" placeholder="name" autocomplete="off" />
       <input   class="message" placeholder="message" autocomplete="off" />
       <button>Send</button>
     </form>
-    <ul class="show-messages" data-room="200"></ul>
+
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+      var messageRoomArray=[];
       $(function () {
         var socket = io();
         $('form').submit(function(){
@@ -43,9 +78,22 @@
           return false;
         });
         socket.on('chat message', function(msg){
+          console.log('back',msg);
           $('.show-messages[data-room='+msg.room_id+']').append($('<li>').text(msg.name+':'+msg.message));
           window.scrollTo(0, document.body.scrollHeight);
         });
+      });
+      $(document).on('click','.room_ch',function(){
+        const self=$(this);
+        const room_id=$(self).attr('data-room');
+        const room_id_beforeclick=$('.room_ch.active').attr('data-room');
+        messageRoomArray[room_id_beforeclick]=$('.show-messages').html();
+        $('.show-messages').html("");
+        $('.room_ch').removeClass('active');
+        $(self).addClass('active');
+        $('#form_chat').attr({'data-room':room_id});
+        $('.show-messages').attr({'data-room':room_id});
+        $('.show-messages').html(messageRoomArray[room_id]);
       });
     </script>
   </body>
